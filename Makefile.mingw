@@ -1,0 +1,17 @@
+CFLAGS=-g -Wall -O0 -DWIN64
+# CC=i686-w64-mingw32-gcc.exe # 32bit
+CC=x86_64-w64-mingw32-gcc.exe
+all: dirsync_server.exe
+# all: wintest.exe
+dirsync_server.exe: winmain.o win32wrapper.o server.o dirsync.o filebyname.o dirbyname.o command.o common/blockmem.o common/filename.o common/fileio.o common/win64.o common/socket.o common/netcommand.o common/someutils.o common/md5.o
+	${CC} -o $@ $^ -lwsock32
+dirsync_client.exe: netcommand_client.o command.o client_dirsync.o utf32.o dirsync.o filebyname.o dirbyname.o common/socket.o common/netcommand.o common/someutils.o common/filename.o common/blockmem.o common/fileio.o common/md5.o
+	${CC} -o $@ $^ -lwsock32
+wintest.exe: wintest.o common/blockmem.o common/filename.o common/fileio.o common/win64.o common/socket.o
+	${CC} -o $@ $^ -lwsock32
+update:
+	scp -pr guilty@192.168.1.8:src/dirsync/\* .
+clean:
+	rm -f dirsync_server.exe wintest.exe dirsync_client.exe core *.o common/*.o
+jesus: clean
+	tar -jcf - . | jesus src.dirsync.tar.bz2
